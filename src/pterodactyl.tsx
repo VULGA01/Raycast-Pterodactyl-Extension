@@ -1,6 +1,18 @@
-import { ActionPanel, Action, List, showToast, Toast, Color, Icon, confirmAlert, Alert, useNavigation, getPreferenceValues, open } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  Toast,
+  Color,
+  Icon,
+  confirmAlert,
+  confirmAlert,
+  Alert,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getServers, setPowerState, getServerResources, sendCommand } from "./api/pterodactyl";
+import { getServers, setPowerState, getServerResources } from "./api/pterodactyl";
 import { Server, ServerResources } from "./api/types";
 
 import ServerConsole from "./console";
@@ -20,7 +32,7 @@ export default function Command() {
     try {
       const data = await getServers();
       setServers(data);
-      setRefreshTick(prev => prev + 1);
+      setRefreshTick((prev) => prev + 1);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -35,16 +47,31 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search servers...">
       {servers.map((server) => (
-        <ServerListItem key={server.attributes.uuid} server={server} refreshTick={refreshTick} onRefresh={fetchServers} />
+        <ServerListItem
+          key={server.attributes.uuid}
+          server={server}
+          refreshTick={refreshTick}
+          onRefresh={fetchServers}
+        />
       ))}
     </List>
   );
 }
 
-function ServerListItem({ server, refreshTick, onRefresh }: { server: Server; refreshTick: number; onRefresh: () => void }) {
+function ServerListItem({
+  server,
+  refreshTick,
+  onRefresh,
+}: {
+  server: Server;
+  refreshTick: number;
+  onRefresh: () => void;
+}) {
   const [stats, setStats] = useState<ServerResources["attributes"] | null>(null);
   const preferences = getPreferenceValues();
-  const panelUrl = preferences.pterodactylUrl.endsWith("/") ? preferences.pterodactylUrl.slice(0, -1) : preferences.pterodactylUrl;
+  const panelUrl = preferences.pterodactylUrl.endsWith("/")
+    ? preferences.pterodactylUrl.slice(0, -1)
+    : preferences.pterodactylUrl;
   const serverUrl = `${panelUrl}/server/${server.attributes.identifier}`;
 
   useEffect(() => {
@@ -52,7 +79,9 @@ function ServerListItem({ server, refreshTick, onRefresh }: { server: Server; re
     getServerResources(server.attributes.identifier).then((data) => {
       if (isMounted) setStats(data);
     });
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [server.attributes.identifier, refreshTick]);
 
   const stateColor = {
@@ -136,8 +165,6 @@ function ServerListItem({ server, refreshTick, onRefresh }: { server: Server; re
   );
 }
 
-
-
 async function handlePowerAction(server: Server, signal: "start" | "stop" | "restart" | "kill", onRefresh: () => void) {
   // Always confirm power actions to prevent mistakes
   if (
@@ -146,7 +173,7 @@ async function handlePowerAction(server: Server, signal: "start" | "stop" | "res
       icon: Icon.Warning,
       primaryAction: {
         title: signal.charAt(0).toUpperCase() + signal.slice(1),
-        style: (signal === "kill" || signal === "stop") ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default
+        style: signal === "kill" || signal === "stop" ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
       },
     }))
   ) {
@@ -161,12 +188,11 @@ async function handlePowerAction(server: Server, signal: "start" | "stop" | "res
 
     // Poll for status updates
     const delays = [1000, 2000, 4000, 6000, 10000, 15000, 20000, 30000];
-    delays.forEach(delay => {
+    delays.forEach((delay) => {
       setTimeout(() => {
         onRefresh();
       }, delay);
     });
-
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to send signal";

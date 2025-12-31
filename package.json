@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pterodactyl",
   "title": "Pterodactyl",
-  "description": "A cool extension to control all your pterodactyl services from raycast",
+  "description": "A cool extension to control all your pterodactyl services from Raycast",
   "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
     {
       "name": "pterodactyl",
       "title": "Pterodactyl",
-      "description": "show pterodactyl services",
+      "description": "Show Pterodactyl services",
       "mode": "view",
-      "subtitle": ""
+      "subtitle": "Manage Servers"
     }
   ],
   "preferences": [
@@ -58,7 +58,7 @@
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
-  "author": "VULGA",
+  "author": "esteban_job",
   "platforms": [
     "Windows",
     "macOS"
