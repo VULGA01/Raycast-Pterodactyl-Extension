@@ -1,9 +1,10 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon, getPreferenceValues, open } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import WebSocket from "ws";
 import { getWebsocketCredentials } from "./api/pterodactyl";
 import { Server } from "./api/types";
 import stripAnsi from "strip-ansi";
+import { uploadLogs } from "./api/mclogs";
 
 export default function ServerConsole({ server }: { server: Server }) {
   const [logs, setLogs] = useState<string[]>([]);
@@ -103,6 +104,29 @@ export default function ServerConsole({ server }: { server: Server }) {
     return cleaned.trim();
   };
 
+  const handleUploadLogs = async () => {
+    if (logs.length === 0) {
+      showToast({ style: Toast.Style.Failure, title: "No logs to upload" });
+      return;
+    }
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading logs to mclo.gs..." });
+
+    try {
+      const cleanedLogs = logs.map(cleanLog).join("\n");
+      const url = await uploadLogs(cleanedLogs);
+
+      await open(url);
+      toast.style = Toast.Style.Success;
+      toast.title = "Logs uploaded!";
+      toast.message = "Opening in browser...";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to upload logs";
+      toast.message = String(error);
+    }
+  };
+
   const reversedLogs = [...logs].reverse();
 
   return (
@@ -141,6 +165,12 @@ export default function ServerConsole({ server }: { server: Server }) {
             actions={
               <ActionPanel>
                 <Action title="Send Command" icon={Icon.Envelope} onAction={sendCommand} />
+                <Action
+                  title="Obtenir un rapport de logs"
+                  icon={Icon.Link}
+                  onAction={handleUploadLogs}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
+                />
                 <Action.CopyToClipboard content={cleaned} title="Copy Log Line" />
                 <Action.CopyToClipboard content={logs.map(cleanLog).join("\n")} title="Copy All Logs" />
               </ActionPanel>
